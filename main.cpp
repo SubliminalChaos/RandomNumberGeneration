@@ -2,53 +2,65 @@
 #include <string>
 #include <iomanip>
 #include <cstdlib>
+
 using namespace std;
 
-int main() {
-    unsigned int frequency1{0}; // count
-    unsigned int frequency2{0}; // count
-    unsigned int frequency3{0}; // count
-    unsigned int frequency4{0}; // count
-    unsigned int frequency5{0}; // count
-    unsigned int frequency6{0}; // count
-    int face; //
+unsigned int rollDice();
 
-    // Seed the generator:
+int main() {
+    // scoped enumeration with constants that represent the game status
+    enum class Status {
+        CONTINUE, WON, LOST
+    }; // all caps in constants
+    // randomize random number generator using current time
     srand(static_cast<unsigned int>(time(nullptr)));
-    // summarize results of 60,000,000 rolls of a die
-    for (unsigned int roll{1}; roll <= 60'000'000 ; ++roll) {
-        face = 1 + rand() % 6; // random number from 1 to 6
-        // determine roll value 1-6 and increment appropriate counter
-        switch (face) {
-            case 1:
-                ++frequency1; // increment the 1s counter
-                break;
-            case 2:
-                ++frequency2; // increment the 2s counter
-                break;
-            case 3:
-                ++frequency3; // increment the 3s counter
-                break;
-            case 4:
-                ++frequency4; // increment the 4s counter
-                break;
-            case 5:
-                ++frequency5; // increment the 5s counter
-                break;
-            case 6:
-                ++frequency6; // increment the 6s counter
-                break;
-            default: // invalid value
-                cout << "Program should never get here!";
+    unsigned int myPoint{0}; // point if no win or loss on first roll
+    Status gameStatus; // can be CONTINUE, WON or LOST
+    unsigned int sumOfDice{rollDice()}; // first roll of the dice
+// determine game status and point (if needed) based on first roll
+    switch (sumOfDice) {
+        case 7: // win with 7 on first roll
+        case 11: // win with 11 on first roll
+            gameStatus = Status::WON;
+            break;
+        case 2: // lose with 2 on first roll
+        case 3: // lose with 3 on first roll
+        case 12: // lose with 12 on first roll
+            gameStatus = Status::LOST;
+            break;
+        default: // did not win or lose, so remember point
+            gameStatus = Status::CONTINUE; // game is not over
+            myPoint = sumOfDice; // remember the point
+            cout << "Point is " << myPoint << endl;
+            break; // optional at end of switch
+    }
+// while game is not complete
+    while (Status::CONTINUE == gameStatus) { // not WON or LOST
+        sumOfDice = rollDice(); // roll dice again
+// determine game status
+        if (sumOfDice == myPoint) { // win by making point
+            gameStatus = Status::WON;
+        } else {
+            if (sumOfDice == 7) { // lose by rolling 7 before point
+                gameStatus = Status::LOST;
+            }
         }
     }
-    cout << "Face" << setw(13) << "Frequency" << endl; // output headers
-    cout << "   1" << setw(13) << frequency1
-         << "\n   2" << setw(13) << frequency2
-         << "\n   3" << setw(13) << frequency3
-         << "\n   4" << setw(13) << frequency4
-         << "\n   5" << setw(13) << frequency5
-         << "\n   6" << setw(13) << frequency6 << endl;
+// display won or lost message
+    if (Status::WON == gameStatus) {
+        cout << "Player wins" << endl;
+    } else {
+        cout << "Player loses" << endl;
+    }
+}
 
-    return 0;
+// roll dice, calculate sum and display results
+unsigned int rollDice() {
+    int die1{1 + rand() % 6}; // first die roll
+    int die2{1 + rand() % 6}; // second die roll
+    int sum{die1 + die2}; // compute sum of die values
+// display results of this roll
+    cout << "Player rolled " << die1 << " + " << die2
+         << " = " << sum << endl;
+    return sum;
 }
