@@ -1,84 +1,23 @@
-/*
- One of the most popular games of chance is a die game known as “craps,” which is played
-in casinos and back alleys worldwide. The rules of the game are straightforward:
-A player rolls two dice. Each die has six faces. These faces contain 1, 2, 3, 4, 5 and 6
-spots. After the dice have come to rest, the sum of the spots on the two upward faces is
-calculated. If the sum is 7 or 11 on the first roll, the player wins. If the sum is 2, 3 or
-12 on the first roll (called “craps”), the player loses (i.e., the “house” wins). If the sum
-is 4, 5, 6, 8, 9 or 10 on the first roll, then that sum becomes the player’s “point.” To
-win, you must continue rolling the dice until you “make your point.” The player loses
-by rolling a 7 before making the point.
- */
 #include <iostream>
-#include <string>
 #include <iomanip>
-#include <cstdlib>
-
+#include <random> // contains C++11 random number generation features
+#include <ctime>
 using namespace std;
 
-unsigned int rollDice();
-
 int main() {
-    // scoped enumeration with constants that represent the game status
-    enum class Status {
-        CONTINUE, WON, LOST
-    }; // all caps in constants
+    // use the default random-number generation engine to
+    // produce uniformly distributed pseudorandom int values from 1 to 6
+    default_random_engine engine{static_cast<unsigned int>(time(nullptr))};
+    uniform_int_distribution<unsigned int> randomInt{1, 6};
 
-    // randomize random number generator using current time
-    srand(static_cast<unsigned int>(time(nullptr)));
+    // loop 10 times
+    for (unsigned int counter{1}; counter <= 10; ++counter) {
+        // pick random number from 1 to 6 and output it
+        cout << setw(10) << randomInt(engine) ;
 
-    unsigned int myPoint{0}; // point if no win or loss on first roll
-    Status gameStatus; // can be CONTINUE, WON or LOST
-    unsigned int sumOfDice{rollDice()}; // first roll of the dice
-
-    // determine game status and point (if needed) based on first roll
-    switch (sumOfDice) {
-        case 7: // win with 7 on first roll
-        case 11: // win with 11 on first roll
-            gameStatus = Status::WON;
-            break;
-        case 2: // lose with 2 on first roll
-        case 3: // lose with 3 on first roll
-        case 12: // lose with 12 on first roll
-            gameStatus = Status::LOST;
-            break;
-        default: // did not win or lose, so remember point
-            gameStatus = Status::CONTINUE; // game is not over
-            myPoint = sumOfDice; // remember the point
-            cout << "Point is " << myPoint << endl;
-            break; // optional at end of switch
-    }
-
-    // while game is not complete
-    while (Status::CONTINUE == gameStatus) { // not WON or LOST
-        sumOfDice = rollDice(); // roll dice again
-
-        // determine game status
-        if (sumOfDice == myPoint) { // win by making point
-            gameStatus = Status::WON;
-        } else {
-            if (sumOfDice == 7) { // lose by rolling 7 before point
-                gameStatus = Status::LOST;
-            }
+        // if counter is divisible by 5, start a new line of output
+        if (counter % 5 == 0) {
+            cout << endl;
         }
     }
-
-    // display won or lost message
-    if (Status::WON == gameStatus) {
-        cout << "Player wins" << endl;
-    } else {
-        cout << "Player loses" << endl;
-    }
-}
-
-// roll dice, calculate sum and display results
-unsigned int rollDice() {
-    int die1{1 + rand() % 6}; // first die roll
-    int die2{1 + rand() % 6}; // second die roll
-    int sum{die1 + die2}; // compute sum of die values
-
-    // display results of this roll
-    cout << "Player rolled " << die1 << " + " << die2
-         << " = " << sum << endl;
-    return sum;
 }
